@@ -38,7 +38,7 @@ def index():
             else: app.vars['price_checked'].append(False)
 
         script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
-        return render_template("plot_boheh.html", div=div,script=script)
+        return render_template("plot_bokeh.html", div=div,script=script)
     
 
 @app.route('/about')
