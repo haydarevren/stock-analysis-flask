@@ -21,6 +21,10 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 
+@app.route('/')
+def root(): 
+  return render_template('index.html')
+
 @app.route('/index',methods=['GET','POST'])
 def index():
     if request.method == 'GET':
@@ -52,7 +56,7 @@ def get_data(ticker):
     response = requests.get(url)
     response = response.json()
     df=pd.DataFrame(response['Time Series (Daily)']).transpose().astype(float)
-    #df.columns=[c for df.columns] Change column names
+    
     df['Date']=pd.to_datetime(df.index)
     return df
 
@@ -61,12 +65,14 @@ def create_bokeh(ticker,price_checked_list):
     price_types=['1. open', '2. high', '3. low', '5. adjusted close']
     price_names=['Opening','Highest','Lowest','Adjusted closing']
     df=get_data(ticker)
-    #source = ColumnDataSource(df)
+
+    TOOLS = 'pan, wheel_zoom, box_zoom, reset, save'
+
+    plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
+
     
-    plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400)
 
-
-    title='Daily prices for %s'%ticker
+    title="{}'s Historical prices".format(ticker)
     p = figure(title=title,**plot_options)
     
     p.xaxis.axis_label = "Date"
@@ -79,14 +85,7 @@ def create_bokeh(ticker,price_checked_list):
         else: 
             pass
     
-    #p2 = figure(title='Day change',**plot_options)
-    #p2.xaxis.axis_label = "Date"
-    #p2.yaxis.axis_label = "Price ($)"
-    #p2.xaxis.major_label_orientation = math.pi/4
 
-    #p2.line(df['Date'],(df['4. close']-df['1. open']),color="olive")
-
-    #fig = gridplot([[p],[p2]])
     fig=p
     
     script, div = components(fig)
