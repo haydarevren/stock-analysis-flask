@@ -69,10 +69,13 @@ def get_data(ticker):
 
     df['daily_returns']=df['adjusted_close'].pct_change()
     df['monthly_returns']=df['adjusted_close'].asfreq('BM').pct_change(1)
+    df['monthly_returns']=df['monthly_returns'].interpolate( limit_area='inside')
     df['yearly_returns']=df['adjusted_close'].asfreq('BY').pct_change(1)
+    df['yearly_returns']=df['yearly_returns'].interpolate( limit_area='inside')
     df['daily_log_returns']=np.log1p(df['daily_returns'])
     df['annualized_volatility']=df['daily_log_returns'].rolling(window=252).std() * np.sqrt(252)
-    df['momentum_12_1']=df['adjusted_close'].asfreq('MS').ffill().shift(1).pct_change(11) 
+    df['momentum_12_1']=df['adjusted_close'].asfreq('MS').ffill().shift(1).pct_change(11)
+    df['momentum_12_1']=df['momentum_12_1'].interpolate( limit_area='inside')
     return df
 
 
