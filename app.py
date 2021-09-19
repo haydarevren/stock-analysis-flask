@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 import requests
 import pandas as pd
 import math
+import numpy as np
 
 from dotenv import load_dotenv
 import os
@@ -20,6 +21,7 @@ from bokeh.palettes import Dark2 as palette
 app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
+app.vars['analysis_checked']=[]
 
 @app.route('/')
 def root(): 
@@ -36,9 +38,15 @@ def index():
         for p in ['price_type%i_name'%i for i in range(1,5)]:
             if request.form.get(p) != None: app.vars['price_checked'].append(True)
             else: app.vars['price_checked'].append(False)
-
-        script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
-        return render_template("plot_bokeh.html", div=div,script=script)
+        
+        app.vars['analysis_checked']=[]
+        for p in ['analysis_type%i_name'%i for i in range(1,6)]:
+            if request.form.get(p) != None: app.vars['analysis_checked'].append(True)
+            else: app.vars['analysis_checked'].append(False)
+        
+        script_price, div_price, script_analysis, div_analysis = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
+    
+        return render_template("plot_bokeh.html", div_price=div_price,script_price=script_price, div_analysis=div_analysis,script_analysis=script_analysis)
     
 
 @app.route('/about')
@@ -47,31 +55,35 @@ def about():
 
 
 def get_data(ticker):
-    try:    key=os.environ.get("API_KEY")
+    try:  
+        api_key=os.environ.get("API_KEY")
     except: 
         load_dotenv()
-        key=os.environ.get("API_KEY")
+        api_key=os.environ.get("API_KEY")
         
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={}&apikey={}'.format(ticker, key)
-    response = requests.get(url)
-    response = response.json()
-    df=pd.DataFrame(response['Time Series (Daily)']).transpose().astype(float)
-    
-    df['Date']=pd.to_datetime(df.index)
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&outputsize=full&apikey={api_key}&datatype=csv'
+    df = pd.read_csv(url)
+    df = df[::-1].reset_index(drop=True)
+    df['timestamp']=pd.to_datetime(df['timestamp'])
+    df.set_index('timestamp', inplace=True)
+
+    df['daily_returns']=df['adjusted_close'].pct_change()
+    df['monthly_returns']=df['adjusted_close'].resample('M').ffill().pct_change()
+    df['yearly_returns']=df['adjusted_close'].resample('Y').ffill().pct_change()
+    df['daily_log_returns']=np.log1p(df['daily_returns'])
+    df['annualized_volatility']=df['daily_log_returns'].rolling(window=252).std() * np.sqrt(252)
+    df['momentum_12_1']=df['adjusted_close'].resample('MS').ffill().shift(1).pct_change(11) 
     return df
 
 
-def create_bokeh(ticker,price_checked_list):
-    price_types=['1. open', '2. high', '3. low', '5. adjusted close']
+def create_bokeh(ticker,price_checked_list,analysis_checked_list):
+    price_types=['open', 'high', 'low', 'adjusted_close']
     price_names=['Opening','Highest','Lowest','Adjusted closing']
     df=get_data(ticker)
 
     TOOLS = 'pan, wheel_zoom, box_zoom, reset, save'
 
     plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
-
-    
-
     title="{}'s Historical prices".format(ticker)
     p = figure(title=title,**plot_options)
     
@@ -81,16 +93,32 @@ def create_bokeh(ticker,price_checked_list):
 
     for i,price in enumerate(price_types):
         if price_checked_list[i]:
-            p.line(df['Date'],df[price],legend=price_names[i],color=palette[len(price_types)][i],line_width=2)
+            p.line(df.index,df[price],legend=price_names[i],color=palette[len(price_types)][i],line_width=2)
+        else: 
+            pass
+    fig=p
+    script_price, div_price = components(fig)
+
+    analysis_types=['daily_returns', 'monthly_returns', 'yearly_returns', 'annualized_volatility','momentum_12_1' ]
+    analysis_names=['Daily Returns','Monthly Returns','Yearly Returns','Annualized Volatility', 'Daily 12-1 Price Momentum Signal' ]
+
+    plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
+    title="{}'s Analysis".format(ticker)
+    p2 = figure(title=title,**plot_options)
+    
+    p2.xaxis.axis_label = "Date"
+    p2.xaxis.major_label_orientation = math.pi/4
+
+    for i,analysis in enumerate(analysis_types):
+        if analysis_checked_list[i]:
+            p2.line(df.index,df[analysis],legend=analysis_names[i],color=palette[len(analysis_types)][i],line_width=2)
         else: 
             pass
     
+    fig2=p2
+    script_analysis, div_analysis = components(fig2)
 
-    fig=p
-    
-    script, div = components(fig)
-    return script, div
-
+    return script_price, div_price, script_analysis, div_analysis
 
 
 if __name__ == "__main__":
