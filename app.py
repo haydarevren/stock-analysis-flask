@@ -44,9 +44,9 @@ def index():
             if request.form.get(p) != None: app.vars['analysis_checked'].append(True)
             else: app.vars['analysis_checked'].append(False)
         
-        script_price, div_price, script_analysis, div_analysis = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
+        script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
     
-        return render_template("plot_bokeh.html", div_price=div_price,script_price=script_price, div_analysis=div_analysis,script_analysis=script_analysis)
+        return render_template("plot_bokeh.html", div=div,script=script)
     
 
 @app.route('/about')
@@ -85,19 +85,18 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
 
     plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
     title="{}'s Historical prices".format(ticker)
-    p = figure(title=title,**plot_options)
+    p1 = figure(title=title,**plot_options)
     
-    p.xaxis.axis_label = "Date"
-    p.yaxis.axis_label = "Price ($)"
-    p.xaxis.major_label_orientation = math.pi/4
+    p1.xaxis.axis_label = "Date"
+    p1.yaxis.axis_label = "Price ($)"
+    p1.xaxis.major_label_orientation = math.pi/4
 
     for i,price in enumerate(price_types):
         if price_checked_list[i]:
-            p.line(df.index,df[price],legend=price_names[i],color=palette[len(price_types)][i],line_width=2)
+            p1.line(df.index,df[price],legend=price_names[i],color=palette[len(price_types)][i],line_width=2)
         else: 
             pass
-    fig=p
-    script_price, div_price = components(fig)
+    
 
     analysis_types=['daily_returns', 'monthly_returns', 'yearly_returns', 'annualized_volatility','momentum_12_1' ]
     analysis_names=['Daily Returns','Monthly Returns','Yearly Returns','Annualized Volatility', 'Daily 12-1 Price Momentum Signal' ]
@@ -115,10 +114,12 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
         else: 
             pass
     
-    fig2=p2
-    script_analysis, div_analysis = components(fig2)
 
-    return script_price, div_price, script_analysis, div_analysis
+    plots = {'Price': p1, 'Analysis': p2}
+
+    script, div = components(plots)
+
+    return script, div
 
 
 if __name__ == "__main__":
