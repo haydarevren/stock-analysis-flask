@@ -117,7 +117,7 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
 
     plots = {'Price': p1, 'Analysis': p2}
 
-    script, div = components(plots)
+    script, div = components(plots['Price'])
 
     return script, div
 
