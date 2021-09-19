@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect
 import requests
+
 import pandas as pd
 import math
 import numpy as np
@@ -32,7 +33,6 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        # request was a POST
         app.vars['stock_name'] = request.form['name_stock']
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
@@ -44,9 +44,9 @@ def index():
             if request.form.get(p) != None: app.vars['analysis_checked'].append(True)
             else: app.vars['analysis_checked'].append(False)
         
-        script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
-    
-        return render_template("plot_bokeh.html", div=div,script=script)
+        script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
+
+        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2 )
     
 
 @app.route('/about')
@@ -97,6 +97,7 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
         else: 
             pass
     
+    script1, div1 = components(p1)
 
     analysis_types=['daily_returns', 'monthly_returns', 'yearly_returns', 'annualized_volatility','momentum_12_1' ]
     analysis_names=['Daily Returns','Monthly Returns','Yearly Returns','Annualized Volatility', 'Daily 12-1 Price Momentum Signal' ]
@@ -115,11 +116,9 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
             pass
     
 
-    plots = {'Price': p1, 'Analysis': p2}
+    script2, div2 = components(p2)
 
-    script, div = components(plots['Price'])
-
-    return script, div
+    return script1, div1, script2, div2
 
 
 if __name__ == "__main__":
