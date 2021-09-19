@@ -68,21 +68,21 @@ def get_data(ticker):
     df.set_index('timestamp', inplace=True)
 
     df['daily_returns']=df['adjusted_close'].pct_change()
-    df['monthly_returns']=df['adjusted_close'].resample('M').ffill().pct_change()
-    df['yearly_returns']=df['adjusted_close'].resample('Y').ffill().pct_change()
+    df['monthly_returns']=df['adjusted_close'].asfreq('BM').pct_change(1)
+    df['yearly_returns']=df['adjusted_close'].asfreq('BY').pct_change(1)
     df['daily_log_returns']=np.log1p(df['daily_returns'])
     df['annualized_volatility']=df['daily_log_returns'].rolling(window=252).std() * np.sqrt(252)
-    df['momentum_12_1']=df['adjusted_close'].resample('MS').ffill().shift(1).pct_change(11) 
+    df['momentum_12_1']=df['adjusted_close'].asfreq('MS').ffill().shift(1).pct_change(11) 
     return df
 
 
 def create_bokeh(ticker,price_checked_list,analysis_checked_list):
-    price_types=['open', 'high', 'low', 'adjusted_close']
-    price_names=['Opening','Highest','Lowest','Adjusted closing']
     df=get_data(ticker)
-
     TOOLS = 'pan, wheel_zoom, box_zoom, reset, save'
 
+    price_types=['open', 'high', 'low', 'adjusted_close']
+    price_names=['Opening','Highest','Lowest','Adjusted closing']
+    
     plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
     title="{}'s Historical prices".format(ticker)
     p1 = figure(title=title,**plot_options)
