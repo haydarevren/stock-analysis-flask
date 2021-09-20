@@ -23,7 +23,7 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
-company_list=pd.read_table('static/nasdaq.txt')
+# company_list=pd.read_table('static/nasdaq.txt')
 
 @app.route('/')
 def root(): 
@@ -36,18 +36,22 @@ def index():
     else:
         app.vars['stock_name'] = request.form['name_stock'].str.upper()
     
-        if app.vars['stock_name'] not in company_list['Symbol'].values:
-            return 'Please enter a valid stock symbol'
+        # if app.vars['stock_name'] not in company_list['Symbol'].values:
+            # return 'Please enter a valid stock symbol'
 
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
-            if request.form.get(p) != None: app.vars['price_checked'].append(True)
-            else: app.vars['price_checked'].append(False)
+            if request.form.get(p) != None: 
+                app.vars['price_checked'].append(True)
+            else: 
+                app.vars['price_checked'].append(False)
         
         app.vars['analysis_checked']=[]
         for p in ['analysis_type%i_name'%i for i in range(1,6)]:
-            if request.form.get(p) != None: app.vars['analysis_checked'].append(True)
-            else: app.vars['analysis_checked'].append(False)
+            if request.form.get(p) != None: 
+                app.vars['analysis_checked'].append(True)
+            else: 
+                app.vars['analysis_checked'].append(False)
         
         script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
 
@@ -66,7 +70,7 @@ def get_data(ticker):
     except: 
         load_dotenv()
         api_key=os.environ.get("API_KEY")
-    api_key='KAX4TFKXT0EZ4T70'    
+       
     url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&outputsize=full&apikey={api_key}&datatype=csv'
     df = pd.read_csv(url)
     df = df[::-1].reset_index(drop=True)
