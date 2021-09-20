@@ -50,7 +50,8 @@ def index():
         
         script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
 
-        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2 ,company=list(company_list[company_list['Symbol']==app.vars['stock_name'] ]['Description'])[0])
+        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2 )
+        
     
 
 @app.route('/about')
