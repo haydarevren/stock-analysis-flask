@@ -4,15 +4,14 @@ from dotenv import load_dotenv
 import os
 
 import pandas as pd
-import math
+from math import pi
 import numpy as np
 
 from bokeh.io import output_file
 from bokeh.plotting import figure
 from bokeh.layouts import row,column
 
-from bokeh.models import ColumnDataSource
-from bokeh.models import HoverTool
+from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 from bokeh.palettes import Dark2 as palette
@@ -43,8 +42,10 @@ def index():
 
         app.vars['price_checked']=[]
         for p in ['price_type%i'%i for i in range(1,5)]:
-            if request.form.get(p) != None: app.vars['price_checked'].append(True)
-            else: app.vars['price_checked'].append(False)
+            if request.form.get(p) != None: 
+                app.vars['price_checked'].append(True)
+            else: 
+                app.vars['price_checked'].append(False)
 
         app.vars['analysis_checked']=[]
         for p in ['analysis_type%i'%i for i in range(1,6)]:
@@ -58,9 +59,9 @@ def index():
 
         ticker_desc = list(company_list[company_list['Symbol']==ticker]['Description'])[0]        
 
-        script1, div1, script2, div2 = create_bokeh(ticker=ticker,price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
+        script1, div1, script2, div2, script3, div3 = create_bokeh(ticker=ticker,price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
 
-        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2, ticker=ticker , ticker_desc=ticker_desc)
+        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2, script3=script3, div3=div3, ticker=ticker , ticker_desc=ticker_desc)
     
 
 @app.route('/about')
@@ -101,6 +102,7 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
     
     p1.xaxis.axis_label = "Date"
     p1.yaxis.axis_label = "Price ($)"
+    p1.xaxis.major_label_orientation = pi/4
 
     for i,price in enumerate(price_types):
         if price_checked_list[i]:
@@ -113,11 +115,11 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
     analysis_types=['daily_returns', 'monthly_returns', 'yearly_returns', 'annualized_volatility','momentum_12_1' ]
     analysis_names=['Daily Returns','Monthly Returns','Yearly Returns','Annualized Volatility', 'Daily 12-1 Price Momentum Signal' ]
 
-    plot_options = dict(x_axis_type="datetime",plot_width=900, plot_height=400, tools = TOOLS)
     title="{}'s Analysis".format(ticker)
     p2 = figure(title=title,**plot_options)
     
     p2.xaxis.axis_label = "Date"
+    p2.xaxis.major_label_orientation = pi/4
 
     for i,analysis in enumerate(analysis_types):
         if analysis_checked_list[i]:
@@ -128,9 +130,24 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
 
     script2, div2 = components(p2)
 
-    return script1, div1, script2, div2
 
+    title="{} Candlestick".format(ticker)
+    p3 = figure(title=title,**plot_options)
 
+    inc = df.close > df.open
+    dec = df.open > df.close
+    w = 12*60*60*1000 # half day in ms
+
+    p3.xaxis.major_label_orientation = pi/4
+    p3.grid.grid_line_alpha=0.3
+
+    p3.segment(df.index, df.high, df.index, df.low, color="black")
+    p3.vbar(df.index[inc], w, df.open[inc], df.close[inc], fill_color="#D5E1DD", line_color="black")
+    p3.vbar(df.index[dec], w, df.open[dec], df.close[dec], fill_color="#F2583E", line_color="black")
+
+    script3, div3 = components(p3)
+
+    return script1, div1, script2, div2, script3, div3
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -66,6 +66,19 @@
       <div class="row">
         <div class="col-lg-12 text-left">
             <h2>  </h2>
+            <h3> Candlestick: {{ticker_desc}} </h3>
+
+            {{ div3|safe }}
+            <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
+            <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"></script>
+            {{ script3|safe }}
+
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 text-left">
+            <h2>  </h2>
             <h3> Analysis: {{ticker_desc}} </h3>
 
             {{ div2|safe }}
