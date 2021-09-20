@@ -85,6 +85,9 @@ def get_data(ticker):
     df['annualized_volatility']=df['daily_log_returns'].rolling(window=252).std() * np.sqrt(252)
     df['momentum_12_1']=df['adjusted_close'].asfreq('MS').ffill().shift(1).pct_change(11)
     df['momentum_12_1']=df['momentum_12_1'].interpolate( limit_area='inside')
+
+    df['moving_avg_50']=df['adjusted_close'].rolling(window=50).mean()
+    df['moving_avg_200']=df['adjusted_close'].rolling(window=200).mean()
     return df
 
 
@@ -142,8 +145,11 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
     p3.grid.grid_line_alpha=0.3
 
     p3.segment(df.index, df.high, df.index, df.low, color="black")
-    p3.vbar(df.index[inc], w, df.open[inc], df.close[inc], fill_color="#D5E1DD", line_color="black")
-    p3.vbar(df.index[dec], w, df.open[dec], df.close[dec], fill_color="#F2583E", line_color="black")
+    p3.vbar(df.index[inc], w, df.open[inc], df.close[inc], fill_color="#17BECF", line_color="black")
+    p3.vbar(df.index[dec], w, df.open[dec], df.close[dec], fill_color="#7F7F7F", line_color="black")
+
+    p3.line(df.index, df['moving_avg_50'], legend='50 Day Moving Avg',line_width=2, line_dash='dashed')
+    p3.line(df.index, df['moving_avg_200'], legend='200 Day Moving Avg',line_width=2, line_dash='dashed')
 
     script3, div3 = components(p3)
 
