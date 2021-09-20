@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect
 import requests
+from dotenv import load_dotenv
+import os
+
 import pandas as pd
 import math
 import numpy as np
-
-from dotenv import load_dotenv
-import os
 
 from bokeh.io import output_file
 from bokeh.plotting import figure
@@ -16,7 +16,6 @@ from bokeh.models import HoverTool
 from bokeh.embed import components
 from bokeh.layouts import gridplot
 from bokeh.palettes import Dark2 as palette
-
 
 app = Flask(__name__)
 app.vars={}
@@ -43,12 +42,12 @@ def index():
         ticker = request.form['name_stock'].upper() 
 
         app.vars['price_checked']=[]
-        for p in ['price_type%i_name'%i for i in range(1,5)]:
+        for p in ['price_type%i'%i for i in range(1,5)]:
             if request.form.get(p) != None: app.vars['price_checked'].append(True)
             else: app.vars['price_checked'].append(False)
 
         app.vars['analysis_checked']=[]
-        for p in ['analysis_type%i_name'%i for i in range(1,6)]:
+        for p in ['analysis_type%i'%i for i in range(1,6)]:
             if request.form.get(p) != None: 
                 app.vars['analysis_checked'].append(True)
             else: 
