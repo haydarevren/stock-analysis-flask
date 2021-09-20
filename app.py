@@ -34,7 +34,7 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        app.vars['stock_name'] = request.form['name_stock']
+        app.vars['stock_name'] = request.form['name_stock'].upper() 
 
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
