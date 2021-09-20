@@ -24,7 +24,7 @@ app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
 
-company_list=pd.read_table('static/NASDAQ.txt')
+company_list=pd.read_table('static/nasdaq.csv')
 
 @app.route('/')
 def root(): 
@@ -35,7 +35,7 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        app.vars['stock_name'] = request.form['name_stock']
+        app.vars['stock_name'] = request.form['name_stock'].str.upper()
 
         if app.vars['stock_name'] not in company_list['Symbol'].values:
             return 'Please enter a valid stock symbol'
