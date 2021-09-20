@@ -23,6 +23,7 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
+company_list=pd.read_table('static/NASDAQ.txt')
 
 @app.route('/')
 def root(): 
@@ -34,7 +35,7 @@ def index():
         return render_template('index.html')
     else:
         app.vars['stock_name'] = request.form['name_stock'].str.upper()
-        company_list=pd.read_table('static/NASDAQ.txt')
+    
         if app.vars['stock_name'] not in company_list['Symbol'].values:
             return 'Please enter a valid stock symbol'
 
@@ -65,7 +66,7 @@ def get_data(ticker):
     except: 
         load_dotenv()
         api_key=os.environ.get("API_KEY")
-        
+    api_key='KAX4TFKXT0EZ4T70'    
     url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&outputsize=full&apikey={api_key}&datatype=csv'
     df = pd.read_csv(url)
     df = df[::-1].reset_index(drop=True)
