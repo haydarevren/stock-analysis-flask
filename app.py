@@ -22,8 +22,14 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
-company_list=pd.read_table('static/NASDAQ.txt')
 
+try:  
+    api_key=os.environ.get("API_KEY")
+except: 
+    load_dotenv()
+    api_key=os.environ.get("API_KEY")
+
+company_list=pd.read_table('static/NASDAQ.txt')
 
 @app.route('/')
 def root(): 
@@ -34,7 +40,7 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        app.vars['stock_name'] = request.form['name_stock'].upper() 
+        ticker = request.form['name_stock'].upper() 
 
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
@@ -48,13 +54,14 @@ def index():
             else: 
                 app.vars['analysis_checked'].append(False)
         
-        
-        if app.vars['stock_name'] not in company_list['Symbol'].values:
-            return 'Please enter a valid stock symbol'        
+        if ticker not in company_list['Symbol'].values:
+            return 'Please enter a valid stock symbol'
 
-        script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
+        ticker_desc = list(company_list[company_list['Symbol']==ticker]['Description'])[0]        
 
-        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2, ticker=app.vars['stock_name'] )
+        script1, div1, script2, div2 = create_bokeh(ticker=ticker,price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
+
+        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2, ticker=ticker , ticker_desc=ticker_desc)
     
 
 @app.route('/about')
@@ -63,12 +70,6 @@ def about():
 
 
 def get_data(ticker):
-    try:  
-        api_key=os.environ.get("API_KEY")
-    except: 
-        load_dotenv()
-        api_key=os.environ.get("API_KEY")
-       
     url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&outputsize=full&apikey={api_key}&datatype=csv'
     df = pd.read_csv(url)
     df = df[::-1].reset_index(drop=True)
@@ -101,7 +102,6 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
     
     p1.xaxis.axis_label = "Date"
     p1.yaxis.axis_label = "Price ($)"
-    p1.xaxis.major_label_orientation = math.pi/4
 
     for i,price in enumerate(price_types):
         if price_checked_list[i]:
@@ -119,7 +119,6 @@ def create_bokeh(ticker,price_checked_list,analysis_checked_list):
     p2 = figure(title=title,**plot_options)
     
     p2.xaxis.axis_label = "Date"
-    p2.xaxis.major_label_orientation = math.pi/4
 
     for i,analysis in enumerate(analysis_types):
         if analysis_checked_list[i]:
