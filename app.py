@@ -86,9 +86,9 @@ def get_data(ticker):
     df['momentum_12_1']=df['adjusted_close'].asfreq('MS').ffill().shift(1).pct_change(11)
     df['momentum_12_1']=df['momentum_12_1'].interpolate( limit_area='inside')
 
-    df['moving_avg_21']=df['adjusted_close'].rolling(window=21).mean()
-    df['moving_avg_50']=df['adjusted_close'].rolling(window=50).mean()
-    df['moving_avg_200']=df['adjusted_close'].rolling(window=200).mean()
+    df['moving_avg_21']=df['close'].rolling(window=21).mean()
+    df['moving_avg_50']=df['close'].rolling(window=50).mean()
+    df['moving_avg_200']=df['close'].rolling(window=200).mean()
     return df
 
 
