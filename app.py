@@ -71,7 +71,8 @@ def get_data(ticker):
         load_dotenv()
         api_key=os.environ.get("API_KEY")
        
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&outputsize=full&apikey={api_key}&datatype=csv'
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&apikey={api_key}&datatype=csv'
+    
     df = pd.read_csv(url)
     df = df[::-1].reset_index(drop=True)
     df['timestamp']=pd.to_datetime(df['timestamp'])
