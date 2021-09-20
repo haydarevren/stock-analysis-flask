@@ -24,6 +24,8 @@ app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
 
+company_list=pd.read_table('static/NASDAQ.txt')
+
 @app.route('/')
 def root(): 
   return render_template('index.html')
@@ -34,6 +36,10 @@ def index():
         return render_template('index.html')
     else:
         app.vars['stock_name'] = request.form['name_stock']
+
+        if app.vars['stock_name'] not in company_list['Symbol'].values:
+            return 'Please enter a valid stock symbol'
+
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
             if request.form.get(p) != None: app.vars['price_checked'].append(True)
@@ -46,7 +52,7 @@ def index():
         
         script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
 
-        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2 )
+        return render_template("plot_bokeh.html", div1=div1,script1=script1, div2=div2,script2=script2 ,company=list(company_list[company_list['Symbol']==app.vars['stock_name'] ]['Description'])[0])
     
 
 @app.route('/about')
