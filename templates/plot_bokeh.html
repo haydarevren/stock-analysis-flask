@@ -53,15 +53,29 @@
         <div class="col-lg-12 text-left">
             
             <h2>..</h2>
-            <h3> Daily stock price: {{stock_name}} </h3>
+            <h3> Daily stock price: {{ticker}} </h3>
 
-            {{ div|safe }}
+            {{ div1|safe }}
             <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
             <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"></script>
-            {{ script|safe }}
+            {{ script1|safe }}
 
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-lg-12 text-left">
+            <h2>  </h2>
+            <h3> Analysis: {{ticker}} </h3>
+
+            {{ div2|safe }}
+            <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
+            <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"></script>
+            {{ script2|safe }}
+
+        </div>
+      </div>
+
     </div>
     <!-- Bootstrap core JavaScript
     ================================================== -->
