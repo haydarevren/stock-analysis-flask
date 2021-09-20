@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect
 import requests
 import pandas as pd
 import math
-import numpy as np
 
 from dotenv import load_dotenv
 import os
@@ -31,19 +30,15 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        ticker = request.form['name_stock'].str.upper()
-
+        # request was a POST
+        app.vars['stock_name'] = request.form['name_stock']
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
             if request.form.get(p) != None: app.vars['price_checked'].append(True)
             else: app.vars['price_checked'].append(False)
 
-        # nasdaq_list=pd.read_table('static/nasdaq.txt')
-        # if ticker not in nasdaq_list['Symbol'].values:
-        #     return 'Please enter a valid stock symbol'
-        ticker_description = 'sas'
-        script, div = create_bokeh(ticker=ticker, ticker_description=ticker_description, price_checked_list=app.vars['price_checked'])
-        return render_template("plot_bokeh.html", ticker_description=ticker_description, div=div,script=script)
+        script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
+        return render_template("plot_bokeh.html", div=div,script=script)
     
 
 @app.route('/about')
@@ -66,7 +61,7 @@ def get_data(ticker):
     return df
 
 
-def create_bokeh(ticker,ticker_description,price_checked_list):
+def create_bokeh(ticker,price_checked_list):
     price_types=['1. open', '2. high', '3. low', '5. adjusted close']
     price_names=['Opening','Highest','Lowest','Adjusted closing']
     df=get_data(ticker)
@@ -77,7 +72,7 @@ def create_bokeh(ticker,ticker_description,price_checked_list):
 
     
 
-    title="{}'s Historical prices".format(ticker_description)
+    title="{}'s Historical prices".format(ticker)
     p = figure(title=title,**plot_options)
     
     p.xaxis.axis_label = "Date"
