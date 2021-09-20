@@ -23,7 +23,7 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
-company_list=pd.read_table('static/NASDAQ.txt')
+company_list=pd.read_table('static/nasdaq.txt')
 
 @app.route('/')
 def root(): 
