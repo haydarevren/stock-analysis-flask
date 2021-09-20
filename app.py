@@ -41,7 +41,7 @@ def index():
         # nasdaq_list=pd.read_table('static/nasdaq.txt')
         # if ticker not in nasdaq_list['Symbol'].values:
         #     return 'Please enter a valid stock symbol'
-        ticker_description = list(nasdaq_list[nasdaq_list['Symbol']==ticker]['Description'])[0]
+        ticker_description = 'sas'
         script, div = create_bokeh(ticker=ticker, ticker_description=ticker_description, price_checked_list=app.vars['price_checked'])
         return render_template("plot_bokeh.html", ticker_description=ticker_description, div=div,script=script)
     
