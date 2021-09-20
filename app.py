@@ -24,7 +24,7 @@ app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
 
-company_list=pd.read_table('static/nasdaq.csv')
+company_list=pd.read_csv('static/nasdaq.csv')
 
 @app.route('/')
 def root(): 
