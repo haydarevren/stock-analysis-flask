@@ -22,6 +22,8 @@ app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
 app.vars['analysis_checked']=[]
+company_list=pd.read_table('static/NASDAQ.txt')
+
 
 @app.route('/')
 def root(): 
@@ -45,6 +47,10 @@ def index():
                 app.vars['analysis_checked'].append(True)
             else: 
                 app.vars['analysis_checked'].append(False)
+        
+        
+        if app.vars['stock_name'] not in company_list['Symbol'].values:
+            return 'Please enter a valid stock symbol'        
 
         script1, div1, script2, div2 = create_bokeh(ticker=app.vars['stock_name'],price_checked_list=app.vars['price_checked'], analysis_checked_list=app.vars['analysis_checked'])
 
