@@ -20,6 +20,7 @@ from bokeh.palettes import Dark2 as palette
 app = Flask(__name__)
 app.vars={}
 app.vars['price_checked']=[]
+app.vars['analysis_checked']=[]
 
 @app.route('/')
 def root(): 
@@ -30,12 +31,19 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')
     else:
-        # request was a POST
         app.vars['stock_name'] = request.form['name_stock']
+        
         app.vars['price_checked']=[]
         for p in ['price_type%i_name'%i for i in range(1,5)]:
             if request.form.get(p) != None: app.vars['price_checked'].append(True)
             else: app.vars['price_checked'].append(False)
+
+        app.vars['analysis_checked']=[]
+        for p in ['analysis_type%i_name'%i for i in range(1,6)]:
+            if request.form.get(p) != None: 
+                app.vars['analysis_checked'].append(True)
+            else: 
+                app.vars['analysis_checked'].append(False)
 
         script, div = create_bokeh(app.vars['stock_name'],app.vars['price_checked'])
         return render_template("plot_bokeh.html", div=div,script=script)
