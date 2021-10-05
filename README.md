@@ -6,4 +6,5 @@ The repository contains a basic template for a Flask configuration that will
 work on Heroku.
 
 Price plots: Opening, Highest, Lowest, Adjusted closing
+
 Analysis plots: Daily Returns, Monthly Returns, Yearly Returns, Annualized Volatility, Daily 12-1 Price Momentum Signal
