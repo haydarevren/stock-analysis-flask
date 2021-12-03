@@ -11,3 +11,17 @@ work on Heroku.
 Price plots: Opening, Highest, Lowest, Adjusted closing
 
 Analysis plots: Daily Returns, Monthly Returns, Yearly Returns, Annualized Volatility, Daily 12-1 Price Momentum Signal
+
+## Installation and Usage
+
+  - Git clone the existing template repository.
+  - Procfile, requirements.txt, conda-requirements.txt, and runtime.txt contain some default settings.
+  - Install Flask
+    ```$ pip install flask```
+  - Install virtualenv to manage dependencies :
+    ```$ pip install virtualenv ```
+    ```pip install -r requirements.txt ```
+  - To launch the app:
+    ``` python app.py ```
+  - Once the Flask app is running, navigate to the `localhost` link provided:
+    <code> * Running on <b>http://127.0.0.1:5000/</b> (Press CTRL+C to quit)</code>
