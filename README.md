@@ -11,7 +11,7 @@ Price plots: Opening, Highest, Lowest, Adjusted closing
 
 Analysis plots: Daily Returns, Monthly Returns, Yearly Returns, Annualized Volatility, Daily 12-1 Price Momentum Signal
 
-## Installation and Usage
+## Installation and Usage (for local use)
 
   - Git clone the existing template repository.
   - Procfile, requirements.txt, conda-requirements.txt, and runtime.txt contain some default settings.
